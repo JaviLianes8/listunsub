@@ -2,18 +2,18 @@
 
 Progress:
 - [x] Brainstorm ranked improvements (this file)
-- [ ] Pin the ground truth: RFC 2369, 8058 (with errata), 6068, 5322, 2047, 6376
-- [ ] RFC 2369 parser: comments, folding, the three "ignore the rest" rules, strict mode
-- [ ] RFC 2047 encoded words decoded inside comments
-- [ ] Safe builder: URI check, header folding, sender headers for one-click
-- [ ] One-click: exact post value, the POST request (urlencoded and multipart)
-- [ ] mailto: parse and build per RFC 6068, a safe unsubscribe message
-- [ ] Choose the method a receiver should use; DKIM `h=` coverage check
-- [ ] Audit a message's headers against RFC 8058 and the Gmail and Yahoo rules
-- [ ] Command line: read a message, print JSON
-- [ ] Contracts: pinned sources, README examples, typing, installed wheel
-- [ ] Docs and packaging: README, CHANGELOG, metadata, sdist contents
-- [ ] Gates: ruff format, ruff check, mypy --strict, pytest
+- [x] Pin the ground truth: RFC 2369, 8058 (with errata), 6068, 5322, 2047, 6376
+- [x] RFC 2369 parser: comments, folding, the three "ignore the rest" rules, strict mode
+- [x] RFC 2047 encoded words decoded inside comments
+- [x] Safe builder: URI check, header folding, sender headers for one-click
+- [x] One-click: exact post value, the POST request (urlencoded and multipart)
+- [x] mailto: parse and build per RFC 6068, a safe unsubscribe message
+- [x] Choose the method a receiver should use; DKIM `h=` coverage check
+- [x] Audit a message's headers against RFC 8058 and the Gmail and Yahoo rules
+- [x] Command line: read a message, print JSON
+- [x] Contracts: pinned sources, README examples, typing, installed wheel
+- [x] Docs and packaging: README, CHANGELOG, metadata, sdist contents
+- [x] Gates: ruff format, ruff check, mypy --strict, pytest
 - [ ] Mutation run: removing guarded logic makes the suite fail
 - [ ] Independent review findings fixed with regression tests
 - [ ] Pull request opened, guard clean
