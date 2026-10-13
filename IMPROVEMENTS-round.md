@@ -14,7 +14,7 @@ Progress:
 - [x] Contracts: pinned sources, README examples, typing, installed wheel
 - [x] Docs and packaging: README, CHANGELOG, metadata, sdist contents
 - [x] Gates: ruff format, ruff check, mypy --strict, pytest
-- [ ] Mutation run: removing guarded logic makes the suite fail
+- [x] Mutation run: removing guarded logic makes the suite fail
 - [x] Independent review findings fixed with regression tests
 - [ ] Pull request opened, guard clean
 
@@ -133,3 +133,16 @@ crypto), List-Help and the other RFC 2369 fields.
 9. DKIM tag values were not checked against VALCHAR.
 10. `__init__.py` defined functions; the link filters moved to `_uri.py`.
 11. Escaped commas split `to=` addresses but not path addresses.
+
+## Mutation run
+
+Line-level mutants of every source line (operators, constants, removed raises, breaks and
+returns), each run against the whole suite with no bytecode written, caches purged and a
+120 second limit, the baseline green before and after. The first run on the final code
+left 52 survivors: the link filters had lost their tests, frozen results, exact error
+reasons, the `-m` entry point and several lenient parsing branches were unpinned; tests
+were added for each. The second run: 476 mutants, 459 killed. The 17 survivors are
+equivalent (a `False` returned as `None` where only truthiness is read, `split(x, 2)[0]`
+for `split(x, 1)[0]`, bounds that cannot be reached, a `continue` at the end of a loop
+body); the last two real ones (a doubled comma skip, lenient base64) got tests and were
+checked to fail on the mutant.

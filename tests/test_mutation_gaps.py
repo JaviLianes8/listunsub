@@ -60,11 +60,12 @@ def test_the_lenient_parser_stops_at_the_first_stray_text() -> None:
     assert parse("<a:b>x<c:d>") == ["a:b"]
     assert parse("<a:b>,<c:d>") == ["a:b", "c:d"]
     assert parse("<<a:b>") == []
+    assert parse("<a:b>,,<c:d>") == ["a:b", "c:d"]
 
 
 def test_invalid_base64_characters_leave_the_word_alone() -> None:
-    word = "=?UTF-8?B?Y2Fm!w==?="
-    assert parse_header(f"({word}) <a:b>").comments == (word,)
+    for word in ("=?UTF-8?B?Y2Fm!w==?=", "=?UTF-8?B?Y2Fm!Zg==?="):
+        assert parse_header(f"({word}) <a:b>").comments == (word,)
 
 
 def test_a_one_character_boundary_is_accepted() -> None:
