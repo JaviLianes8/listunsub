@@ -1,0 +1,56 @@
+{
+  "rfc2369.txt": {
+    "title": "RFC 2369, The Use of URLs as Meta-Syntax for Core Mail List Commands (July 1998)",
+    "url": "https://www.rfc-editor.org/rfc/rfc2369.txt",
+    "revision": "RFC 2369 as published (RFCs are immutable)",
+    "fetched": "2026-10-13",
+    "licence": "IETF Trust Legal Provisions",
+    "size": 30853,
+    "sha256": "659e81dbe0c700870b9ae35c765a70ad8c4c4127506df8c809d6e1393dc1998b"
+  },
+  "rfc8058.txt": {
+    "title": "RFC 8058, Signaling One-Click Functionality for List Email Headers (January 2017)",
+    "url": "https://www.rfc-editor.org/rfc/rfc8058.txt",
+    "revision": "RFC 8058 as published (RFCs are immutable)",
+    "fetched": "2026-10-13",
+    "licence": "IETF Trust Legal Provisions",
+    "size": 18219,
+    "sha256": "94f4529f3545fd0d6e7faac0f57d59ab7933b8fdf6e700017114c783b526c68f"
+  },
+  "rfc6068.txt": {
+    "title": "RFC 6068, The 'mailto' URI Scheme (October 2010)",
+    "url": "https://www.rfc-editor.org/rfc/rfc6068.txt",
+    "revision": "RFC 6068 as published (RFCs are immutable)",
+    "fetched": "2026-10-13",
+    "licence": "IETF Trust Legal Provisions",
+    "size": 36683,
+    "sha256": "a450492a89d30689c0a73e26e1a1d7bccf761405b23c15567f0cf9db575984af"
+  },
+  "rfc5322.txt": {
+    "title": "RFC 5322, Internet Message Format (October 2008)",
+    "url": "https://www.rfc-editor.org/rfc/rfc5322.txt",
+    "revision": "RFC 5322 as published (RFCs are immutable)",
+    "fetched": "2026-10-13",
+    "licence": "IETF Trust Legal Provisions",
+    "size": 122322,
+    "sha256": "cb459acca15a2aa895863eaeff6f1d5b9c4ca15578ae3e3706f757787a385969"
+  },
+  "rfc2047.txt": {
+    "title": "RFC 2047, MIME Part Three: Message Header Extensions for Non-ASCII Text (November 1996)",
+    "url": "https://www.rfc-editor.org/rfc/rfc2047.txt",
+    "revision": "RFC 2047 as published (RFCs are immutable)",
+    "fetched": "2026-10-13",
+    "licence": "IETF Trust Legal Provisions",
+    "size": 33262,
+    "sha256": "f3b1356151ae24d616076880115c5ac0c313a88bcbe76d32d0cacf4b5f24f01d"
+  },
+  "rfc6376.txt": {
+    "title": "RFC 6376, DomainKeys Identified Mail (DKIM) Signatures (September 2011)",
+    "url": "https://www.rfc-editor.org/rfc/rfc6376.txt",
+    "revision": "RFC 6376 as published (RFCs are immutable)",
+    "fetched": "2026-10-13",
+    "licence": "IETF Trust Legal Provisions",
+    "size": 176999,
+    "sha256": "00ae1e26aa19e0b8a6087435a524d23e824e2c31ebd62544dd714923bf8553f0"
+  }
+}
