@@ -13,7 +13,10 @@ def test_parse_reads_the_uris_in_order() -> None:
 def test_surrounding_white_space_and_folds_are_skipped() -> None:
     value = "\r\n  <https://example.com/u>  ,\r\n\t<mailto:a@b.co> "
     assert parse(value) == ["https://example.com/u", "mailto:a@b.co"]
-    assert parse("\n <https://a.test/u>,\n <mailto:a@b.co>") == ["https://a.test/u", "mailto:a@b.co"]
+    assert parse("\n <https://a.test/u>,\n <mailto:a@b.co>") == [
+        "https://a.test/u",
+        "mailto:a@b.co",
+    ]
 
 
 def test_white_space_inside_brackets_is_removed() -> None:
@@ -99,7 +102,11 @@ def test_strict_accepts_a_clean_field() -> None:
         ("<a: b>", "white space inside angle brackets", 3),
         ("<>", "empty URI", 0),
         ("<nocolon>", "URI has no scheme: 'nocolon'", 0),
-        ("<a:b>, <h:\u00e9>", "URI holds a character outside RFC 3986 or a bad escape: 'h:\u00e9'", 7),
+        (
+            "<a:b>, <h:\u00e9>",
+            "URI holds a character outside RFC 3986 or a bad escape: 'h:\u00e9'",
+            7,
+        ),
         ("<a:%zz>", "URI holds a character outside RFC 3986 or a bad escape: 'a:%zz'", 0),
         ("(open <a:b>", "comment is not closed", 0),
         ("(a\x01) <a:b>", "control character in a comment", 2),
