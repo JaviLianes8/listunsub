@@ -44,7 +44,7 @@ def test_only_the_first_good_https_uri_is_offered_for_one_click() -> None:
 
 def test_schemes_limit_the_choice_in_the_senders_order() -> None:
     assert choose(FIELD, schemes=("https", "http")) == Action("web", "http://a.test/web")
-    assert choose(FIELD, schemes=("https",)) == Action("web", "https://a.test/one")
+    assert choose(FIELD, schemes=["https"]) == Action("web", "https://a.test/one")
     assert choose(FIELD, POST, dkim_verified=True, schemes=()) == Action(
         "one-click", "https://a.test/one"
     )

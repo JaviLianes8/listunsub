@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import hashlib
 import json
+import re
 from pathlib import Path
 
 import pytest
@@ -58,3 +59,12 @@ def rfc2047() -> str:
 def rfc6376() -> str:
     """RFC 6376, see tests/upstream/MANIFEST.json for its source."""
     return read_upstream("rfc6376.txt")
+
+
+def section(text: str, title: str, end: str) -> str:
+    """The body of an RFC section: its last heading (the first is in the contents) to ``end``.
+
+    The page footers and headers that interrupt the text are removed.
+    """
+    body = text.rsplit(title, 1)[1].split(end, 1)[0]
+    return re.sub(r"\n+[^\n]*\[Page \d+\]\n\x0c?\n*RFC \d+ [^\n]*\n+", "\n\n", body)
