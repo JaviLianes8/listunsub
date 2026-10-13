@@ -15,7 +15,7 @@ Progress:
 - [x] Docs and packaging: README, CHANGELOG, metadata, sdist contents
 - [x] Gates: ruff format, ruff check, mypy --strict, pytest
 - [ ] Mutation run: removing guarded logic makes the suite fail
-- [ ] Independent review findings fixed with regression tests
+- [x] Independent review findings fixed with regression tests
 - [ ] Pull request opened, guard clean
 
 ## Starting point
@@ -114,3 +114,22 @@ without notice, so they are cited here and not pinned; nothing is tested against
 
 Out of scope: sending mail or HTTP requests, verifying DKIM signatures (needs DNS and
 crypto), List-Help and the other RFC 2369 fields.
+
+## Review findings (fixed, each with a test in `tests/test_review_fixes.py`)
+
+1. The command line crashed printing non-ASCII JSON to a cp1252 pipe: it now writes UTF-8.
+2. `to_message` let controls into headers and strict `mailto:` parsing accepted decoded
+   controls, angle brackets and stray spaces in addresses: both refuse them now.
+3. An internationalized domain became an encoded word in To: it is now sent in IDNA form
+   (RFC 6068 section 2, rule 4), and `build_mailto` prefers that form too.
+4. `actions` offered one-click even when `https` was not in `schemes`.
+5. Decoded comments could carry CR, LF, NUL and bidi overrides, and Python-only codecs
+   (`unicode_escape`, `idna`) were used as charsets: unsafe characters are replaced and
+   only charset codecs decode.
+6. Web actions were offered for `https:` URIs without a host.
+7. Strict mode accepted a bare CR and a quoted control character. A bare LF fold stays
+   accepted on purpose: Python text normally carries LF line ends.
+8. The 998 limit counted characters, not octets.
+9. DKIM tag values were not checked against VALCHAR.
+10. `__init__.py` defined functions; the link filters moved to `_uri.py`.
+11. Escaped commas split `to=` addresses but not path addresses.
