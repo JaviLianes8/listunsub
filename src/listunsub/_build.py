@@ -11,6 +11,8 @@ from ._oneclick import ONE_CLICK_POST, one_click_request
 from ._uri import check_uri
 
 _FIELD_NAME = re.compile(r"[\x21-\x39\x3b-\x7e]+")
+# Unicode line and paragraph separators: str.splitlines and some mail code break on them.
+_BREAKS = "\u2028\u2029"
 
 
 def build(uris: Iterable[str]) -> str:
@@ -37,7 +39,7 @@ def header_line(name: str, value: str, *, width: int = 78) -> str:
     if _FIELD_NAME.fullmatch(name) is None:
         raise ListUnsubscribeError(f"invalid header field name: {name!r}")
     for index, char in enumerate(value):
-        if (ord(char) < 0x20 and char != "\t") or ord(char) == 0x7F:
+        if (ord(char) < 0x20 and char != "\t") or 0x7F <= ord(char) <= 0x9F or char in _BREAKS:
             raise ListUnsubscribeError("control character in a header value", index)
     lines = [f"{name}:"]
     for word in value.split(" "):

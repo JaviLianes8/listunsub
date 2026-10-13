@@ -50,7 +50,7 @@ def build_mailto(
         key = name.lower()
         if _FIELD_NAME.fullmatch(name) is None or key == "to" or key in seen:
             raise ListUnsubscribeError(f"field {name!r} is invalid, repeated or 'to'")
-        if key != "body" and ("\r" in value or "\n" in value):
+        if key != "body" and value.splitlines() not in ([], [value]):
             raise ListUnsubscribeError(f"line break in the {name!r} field")
         seen.add(key)
         query.append(f"{quote(name, safe='')}={quote(value, safe=_VALUE_SAFE)}")

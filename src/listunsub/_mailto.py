@@ -65,7 +65,7 @@ class Mailto:
         headers = [("From", sender), ("To", ", ".join(self.to))]
         headers += [(name.title(), value) for name in _MESSAGE_FIELDS if (value := self.get(name))]
         for name, value in headers:
-            if "\r" in value or "\n" in value:
+            if value.splitlines() != [value]:
                 raise ListUnsubscribeError(f"line break in the {name} header value")
             message[name] = value
         message.set_content(self.body or "")

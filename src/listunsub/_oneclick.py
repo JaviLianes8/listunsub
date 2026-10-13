@@ -67,9 +67,13 @@ def one_click_request(
     it is never sent. Raises ``ListUnsubscribeError`` for a URI that is not HTTPS, has no
     host, or carries user information (that would be authorization context).
     """
-    parts = urlsplit(check_uri(uri))
-    if scheme_of(uri) != "https":
+    if scheme_of(check_uri(uri)) != "https":
         raise ListUnsubscribeError(f"one-click needs an https URI: {uri!r}")
+    try:
+        parts = urlsplit(uri)
+        parts.port  # noqa: B018  (reading it validates the port)
+    except ValueError as error:
+        raise ListUnsubscribeError(f"one-click URI has a bad authority: {error}") from None
     if "@" in parts.netloc:
         raise ListUnsubscribeError(f"one-click URI must not carry user information: {uri!r}")
     if not parts.hostname:
