@@ -2,8 +2,6 @@
 
 from __future__ import annotations
 
-from collections.abc import Iterable
-
 from ._audit import Problem, audit
 from ._build import build, header_line, sender_headers
 from ._choose import Action, actions, choose
@@ -19,7 +17,7 @@ from ._oneclick import (
     one_click_post,
     one_click_request,
 )
-from ._uri import scheme_of
+from ._uri import http_links, mailto_links
 
 __version__ = "0.2.0"
 
@@ -49,13 +47,3 @@ __all__ = [
     "sender_headers",
     "signed_headers",
 ]
-
-
-def mailto_links(uris: Iterable[str]) -> list[str]:
-    """Return only the ``mailto:`` URIs, preserving order."""
-    return [uri for uri in uris if scheme_of(uri) == "mailto"]
-
-
-def http_links(uris: Iterable[str]) -> list[str]:
-    """Return only the ``http:`` and ``https:`` URIs, preserving order."""
-    return [uri for uri in uris if scheme_of(uri) in ("http", "https")]

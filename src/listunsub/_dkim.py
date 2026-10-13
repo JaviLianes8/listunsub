@@ -7,6 +7,9 @@ import re
 from ._errors import ListUnsubscribeError
 
 _TAG_NAME = re.compile(r"[A-Za-z][A-Za-z0-9_]*")
+# tag-value: VALCHAR runs (%x21-3A / %x3C-7E) separated by white space, already unfolded.
+_VALUE = re.compile(r"(?:[!-:<-~]+(?: +[!-:<-~]+)*)?")
+_FIELD = re.compile(r"[!-9;-~]+")
 ONE_CLICK_FIELDS = ("List-Unsubscribe", "List-Unsubscribe-Post")
 
 
@@ -28,12 +31,15 @@ def signed_headers(signature: str) -> tuple[str, ...]:
             raise ListUnsubscribeError(f"malformed DKIM tag {spec.strip(' ')!r}")
         if name in tags:
             raise ListUnsubscribeError(f"DKIM tag {name!r} appears twice")
-        tags[name] = value.strip(" ")
+        value = value.strip(" ")
+        if _VALUE.fullmatch(value) is None:
+            raise ListUnsubscribeError(f"DKIM tag {name!r} has a character outside VALCHAR")
+        tags[name] = value
     if "h" not in tags:
         raise ListUnsubscribeError("the DKIM signature has no h= tag")
     names = tuple(part.strip(" ").lower() for part in tags["h"].split(":"))
-    if not all(names):
-        raise ListUnsubscribeError("empty field name in the DKIM h= tag")
+    if not all(_FIELD.fullmatch(name) for name in names):
+        raise ListUnsubscribeError("empty or invalid field name in the DKIM h= tag")
     return names
 
 

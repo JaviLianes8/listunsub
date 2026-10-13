@@ -98,8 +98,9 @@ def test_build_escapes_delimiters_in_addresses() -> None:
 def test_build_round_trips_through_strict_parse() -> None:
     addresses = ['"a b"@x.test', "café@é.test", "plain@x.test"]
     uri = build_mailto(addresses, subject="s?&=", body="b\r\nc")
+    assert "@xn--9ca.test" in uri
     mailto = parse_mailto(uri, strict=True)
-    assert mailto.to == tuple(addresses)
+    assert mailto.to == (addresses[0], "caf\u00e9@xn--9ca.test", addresses[2])
     assert mailto.fields == (("subject", "s?&="), ("body", "b\r\nc"))
 
 

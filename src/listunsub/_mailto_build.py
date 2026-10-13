@@ -2,10 +2,12 @@
 
 from __future__ import annotations
 
+import contextlib
 import re
 from collections.abc import Iterable
 from urllib.parse import quote
 
+from ._compose import address_problem, ascii_domain
 from ._errors import ListUnsubscribeError
 
 # Escaping a delimiter is always legal, so "&", ";", "=" and "," stay escaped in addresses,
@@ -16,9 +18,13 @@ _FIELD_NAME = re.compile(r"[\x21-\x39\x3b-\x7e]+")
 
 
 def _address(address: str) -> str:
-    local, at, domain = address.rpartition("@")
-    if not (local and at and domain):
-        raise ListUnsubscribeError(f"not an addr-spec: {address!r}")
+    problem = address_problem(address)
+    if problem is not None:
+        raise ListUnsubscribeError(problem)
+    local, _, domain = address.rpartition("@")
+    # Section 2, rule 4: producers SHOULD give the IDNA form rather than escapes.
+    with contextlib.suppress(ListUnsubscribeError):
+        domain = ascii_domain(domain)
     return f"{quote(local, safe=_ADDRESS_SAFE)}@{quote(domain, safe=_ADDRESS_SAFE)}"
 
 
@@ -34,7 +40,7 @@ def build_mailto(
     Non-ASCII text is written as UTF-8 escapes, spaces as ``%20``. Line breaks in
     ``body`` become ``%0D%0A`` (bare LF or CR are made CRLF first); a line break in any
     other value, a repeated field, a ``to`` field (use ``to``), an invalid field name or
-    an address without ``@`` raises ``ListUnsubscribeError``.
+    an unusable address (no ``@``, controls, stray white space) raises ``ListUnsubscribeError``.
     """
     addresses = [to] if isinstance(to, str) else list(to)
     if not addresses:

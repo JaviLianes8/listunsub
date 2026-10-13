@@ -33,8 +33,8 @@ def header_line(name: str, value: str, *, width: int = 78) -> str:
 
     Lines are joined by CRLF followed by a space (RFC 5322 section 2.2.3); no CRLF ends
     the result. A word too long to fold stays on its own line, but a line over the hard
-    998-character limit (section 2.1.1) raises ``ListUnsubscribeError``, as do a bad field
-    name and a value holding a line break or another control character.
+    998-octet limit (section 2.1.1, counted in UTF-8) raises ``ListUnsubscribeError``,
+    as do a bad field name and a value holding a line break or another control character.
     """
     if _FIELD_NAME.fullmatch(name) is None:
         raise ListUnsubscribeError(f"invalid header field name: {name!r}")
@@ -50,8 +50,9 @@ def header_line(name: str, value: str, *, width: int = 78) -> str:
         else:
             lines.append(f" {word}")
     for line in lines:
-        if len(line) > 998:
-            raise ListUnsubscribeError("a header line would exceed 998 characters")
+        # The limit counts octets; non-ASCII text (RFC 6532) is sent as UTF-8.
+        if len(line.encode()) > 998:
+            raise ListUnsubscribeError("a header line would exceed 998 octets")
     return "\r\n".join(lines)
 
 

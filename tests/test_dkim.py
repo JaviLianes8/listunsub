@@ -35,9 +35,9 @@ def test_a_trailing_semicolon_and_empty_tags_are_fine() -> None:
         ("h=a; junk", "malformed DKIM tag 'junk'"),
         ("h=a; =x", "malformed"),
         ("h=a; 1x=y", "malformed"),
-        ("h=a::b", "empty field name"),
-        ("h=", "empty field name"),
-        ("h=a:", "empty field name"),
+        ("h=a::b", "empty or invalid field name"),
+        ("h=", "empty or invalid field name"),
+        ("h=a:", "empty or invalid field name"),
     ],
 )
 def test_malformed_tag_lists_are_refused(signature: str, reason: str) -> None:

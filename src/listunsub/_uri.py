@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import re
+from collections.abc import Iterable
 
 from ._errors import ListUnsubscribeError
 
@@ -35,3 +36,13 @@ def scheme_of(uri: str) -> str:
     """The lower-cased scheme of ``uri``, or an empty string when it has none."""
     match = re.match(r"([A-Za-z][A-Za-z0-9+.\-]*):", uri)
     return match.group(1).lower() if match else ""
+
+
+def mailto_links(uris: Iterable[str]) -> list[str]:
+    """Return only the ``mailto:`` URIs, preserving order."""
+    return [uri for uri in uris if scheme_of(uri) == "mailto"]
+
+
+def http_links(uris: Iterable[str]) -> list[str]:
+    """Return only the ``http:`` and ``https:`` URIs, preserving order."""
+    return [uri for uri in uris if scheme_of(uri) in ("http", "https")]

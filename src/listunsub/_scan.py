@@ -7,14 +7,19 @@ import re
 from ._errors import ListUnsubscribeError
 from ._rfc2047 import decode_words
 
+# Controls (tab aside), line separators and bidi overrides, unsafe to show from a comment.
+_UNSAFE = re.compile(r"[\x00-\x08\x0a-\x1f\x7f-\x9f\u2028\u2029\u202a-\u202e\u2066-\u2069]")
 _WSP = " \t"
 
 
 class Scanner:
     """A cursor over a field body that knows folding and nested comments.
 
-    In strict mode a line break must be followed by white space (a fold), a comment must
-    be closed and hold no control characters; otherwise those slips are tolerated.
+    In strict mode a line break (CRLF, or LF as Python text usually carries it) must be
+    followed by white space (a fold), a bare CR is refused, and a comment must be closed
+    and hold no control character, even quoted; otherwise those slips are tolerated.
+    Comment text is untrusted: controls, line separators and bidi overrides in it are
+    replaced by U+FFFD.
     """
 
     def __init__(self, text: str, *, strict: bool) -> None:
@@ -36,7 +41,9 @@ class Scanner:
         text, start = self.text, self.pos
         if text.startswith("\r\n", start):
             self.pos += 2
-        elif text[start : start + 1] in ("\r", "\n"):
+        elif text[start : start + 1] == "\n" or (
+            text[start : start + 1] == "\r" and not self.strict
+        ):
             self.pos += 1
         else:
             return False
@@ -54,7 +61,7 @@ class Scanner:
             elif self._skip_break():
                 continue
             elif char == "(":
-                comments.append(decode_words(self._comment()))
+                comments.append(_UNSAFE.sub("\ufffd", decode_words(self._comment())))
             else:
                 break
         return comments
@@ -71,6 +78,8 @@ class Scanner:
                 continue
             self.pos += 1
             if char == "\\" and not self.at_end():
+                if self.strict and _UNSAFE.match(self.peek()):
+                    raise self.fail("quoted pair of a control character", self.pos)
                 out.append(self.peek())
                 self.pos += 1
                 continue

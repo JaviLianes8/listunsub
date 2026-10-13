@@ -37,6 +37,14 @@ All notable changes to this project are documented here. The format follows
 - The `listunsub` command and `python -m listunsub`.
 - Tests against the RFC texts, fetched on demand by `scripts/fetch_upstream.py`.
 
+### Security
+
+- Control characters, line separators and bidi overrides are replaced in decoded
+  comments; only real MIME charsets are decoded in encoded words.
+- `to_message` and `build_mailto` refuse controls and stray white space in addresses
+  and header values; strict `mailto:` parsing checks decoded addresses.
+- `one_click_request` and `choose` turn a bad authority into `ListUnsubscribeError`.
+
 ## [0.1.0]
 
 - Parse a List-Unsubscribe header value into its URIs (RFC 2369), tolerant of

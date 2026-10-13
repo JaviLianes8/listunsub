@@ -126,7 +126,7 @@ def test_strict_allows_tabs_and_non_ascii_in_comments() -> None:
 
 def test_lenient_tolerates_bare_line_breaks_and_controls() -> None:
     assert parse_header("<a:b>\r\n<c:d>").uris == ("a:b",)
-    assert parse_header("(a\x01) <a:b>").comments == ("a\x01",)
+    assert parse_header("(a\x01) <a:b>").comments == ("a\ufffd",)
 
 
 def test_scheme_filters_are_case_insensitive() -> None:

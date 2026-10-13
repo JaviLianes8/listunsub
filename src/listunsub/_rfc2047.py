@@ -8,6 +8,8 @@ import codecs
 import re
 
 _WORD = re.compile(r"=\?([^?\s()]+)\?([BbQq])\?([^?\s]*)\?=")
+# Python codecs that are not MIME charsets: they would turn escapes into arbitrary text.
+_NOT_CHARSETS = frozenset({"idna", "punycode", "mbcs", "oem", "undefined", "rot-13"})
 _HEX = re.compile(rb"=([0-9A-Fa-f]{2})")
 
 
@@ -15,7 +17,9 @@ def _decode(charset: str, encoding: str, text: str) -> str | None:
     # RFC 2231 lets a language follow the charset after "*".
     name = charset.split("*", 1)[0]
     try:
-        codecs.lookup(name)
+        codec = codecs.lookup(name).name
+        if codec in _NOT_CHARSETS or "escape" in codec:
+            return None
         raw = text.encode("ascii")
         if encoding in "Bb":
             data = base64.b64decode(raw, validate=True)

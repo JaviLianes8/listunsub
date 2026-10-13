@@ -62,5 +62,8 @@ def main(argv: Sequence[str] | None = None) -> int:
         print(f"listunsub: {error}", file=sys.stderr)
         return 2
     result = report(raw, dkim_verified=args.dkim_verified)
-    print(json.dumps(result, indent=2, ensure_ascii=False))
+    # Write UTF-8 bytes: the console or pipe encoding may not hold every decoded comment.
+    sys.stdout.flush()
+    sys.stdout.buffer.write(json.dumps(result, indent=2, ensure_ascii=False).encode() + b"\n")
+    sys.stdout.buffer.flush()
     return 1 if result["problems"] else 0

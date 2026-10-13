@@ -7,6 +7,7 @@ from dataclasses import dataclass
 from email.message import EmailMessage
 from urllib.parse import unquote
 
+from ._compose import address_problem, compose
 from ._errors import ListUnsubscribeError
 from ._uri import scheme_of
 
@@ -56,20 +57,12 @@ class Mailto:
         """Compose the message this URI asks for, sent by ``sender``.
 
         Only To, Subject, Keywords and the body are used (RFC 6068 sections 3 and 4 call
-        the others unsafe or say they must be ignored). Raises ``ListUnsubscribeError``
-        when there is no recipient or a header value holds a line break.
+        the others unsafe or say they must be ignored). An internationalized domain is
+        written in its IDNA form (section 2, rule 4). Raises ``ListUnsubscribeError`` when
+        there is no recipient or sender, an address is not usable, or a header value holds
+        a line break or a control character.
         """
-        if not self.to:
-            raise ListUnsubscribeError("the mailto URI names no recipient")
-        message = EmailMessage()
-        headers = [("From", sender), ("To", ", ".join(self.to))]
-        headers += [(name.title(), value) for name in _MESSAGE_FIELDS if (value := self.get(name))]
-        for name, value in headers:
-            if value.splitlines() != [value]:
-                raise ListUnsubscribeError(f"line break in the {name} header value")
-            message[name] = value
-        message.set_content(self.body or "")
-        return message
+        return compose(self.to, sender, [(n, self.get(n)) for n in _MESSAGE_FIELDS], self.body)
 
 
 def parse_mailto(uri: str, *, strict: bool = False) -> Mailto:
@@ -86,7 +79,7 @@ def parse_mailto(uri: str, *, strict: bool = False) -> Mailto:
     path, _, query = rest.partition("?")
     if strict and _PATH.fullmatch(path) is None:
         raise ListUnsubscribeError(f"character not allowed in a mailto URI: {uri!r}")
-    to = [_decode(address, strict) for address in path.split(",") if address]
+    to = _addresses(path, strict)
     fields: list[tuple[str, str]] = []
     for item in query.split("&") if query else ():
         name, equals, value = item.partition("=")
@@ -95,14 +88,23 @@ def parse_mailto(uri: str, *, strict: bool = False) -> Mailto:
         if not equals:
             continue
         name = _decode(name, strict).lower()
-        value = _decode(value, strict)
         if name == "to":
-            to += [address for address in value.split(",") if address]
+            to += _addresses(value, strict)
         else:
-            fields.append((name, value))
-    if strict:
-        for address in to:
-            local, at, domain = address.rpartition("@")
-            if not (local and at and domain):
-                raise ListUnsubscribeError(f"not an addr-spec: {address!r}")
+            fields.append((name, _decode(value, strict)))
     return Mailto(tuple(to), tuple(fields))
+
+
+def _addresses(raw: str, strict: bool) -> list[str]:
+    """Split on the delimiting commas first, then decode, so "%2C" never splits."""
+    found = []
+    for part in raw.split(","):
+        if not part:
+            continue
+        address = _decode(part, strict)
+        problem = address_problem(address)
+        if strict and problem is not None:
+            raise ListUnsubscribeError(problem)
+        if address.strip(" \t"):
+            found.append(address.strip(" \t"))
+    return found

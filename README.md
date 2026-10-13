@@ -54,6 +54,9 @@ except ListUnsubscribeError as error:
 # expected ',' after '>' 24
 ```
 
+Comments are decoded for display but remain untrusted text: control characters, line
+separators and bidi overrides in them are replaced by U+FFFD.
+
 Without a verified DKIM signature `choose` never returns one-click: RFC 8058 section 4
 says not to offer it. `actions` lists every usable way, best first, so you can fall back
 when one fails. `one_click_request` refuses anything but an HTTPS URI with a host and no
@@ -80,9 +83,10 @@ print(dkim_covers("v=1; d=example.com; h=from:to:list-unsubscribe:list-unsubscri
 # True
 ```
 
-`build` and `header_line` refuse what would break the header or inject another one:
-a URI without a scheme, white space, angle brackets, control characters or raw non-ASCII
-text, a bad field name, or a line over the 998-character limit.
+`build` refuses a URI that would break the header or inject another one: no scheme,
+white space, angle brackets, control characters or raw non-ASCII text. `header_line`
+refuses a bad field name, control characters and Unicode line separators, and a line
+over the 998-octet limit.
 
 ## mailto URIs
 
@@ -101,7 +105,8 @@ print(message["To"], "|", message["Subject"])
 ```
 
 `to_message` keeps only To, Subject, Keywords and the body, as RFC 6068 sections 3 and 4
-advise, and refuses a header value holding a line break.
+advise, writes an internationalized domain in its IDNA form, and refuses a header value
+holding a line break or a control character. `build_mailto` also prefers the IDNA form.
 
 ## Checking a message
 

@@ -5,6 +5,7 @@ from __future__ import annotations
 from collections.abc import Collection
 from dataclasses import dataclass
 from typing import Literal
+from urllib.parse import urlsplit
 
 from ._errors import ListUnsubscribeError
 from ._header import ListUnsubscribe, parse_header
@@ -32,7 +33,10 @@ def _usable(uri: str, scheme: str) -> bool:
             return bool(parse_mailto(uri, strict=True).to)
         except ListUnsubscribeError:
             return False
-    return True
+    try:
+        return bool(urlsplit(uri).hostname)
+    except ValueError:
+        return False
 
 
 def actions(
@@ -46,16 +50,19 @@ def actions(
 
     One-click comes first, but only when ``post`` is the RFC 8058 value, an HTTPS URI that
     can be POSTed to exists, and the caller has verified a DKIM signature covering both
-    fields (``dkim_verified``; section 4 says not to offer one-click otherwise). The other
-    URIs follow in the sender's order (RFC 2369: left-most supported first), keeping only
-    those whose scheme is in ``schemes`` and that are well formed. Try the next one only
-    if the previous one failed.
+    fields (``dkim_verified``; section 4 says not to offer one-click otherwise), and
+    ``https`` is among ``schemes``. The other URIs follow in the sender's order (RFC 2369:
+    left-most supported first), keeping only those whose scheme is in ``schemes`` and
+    that are well formed (a web URI needs a host, a mailto URI a usable recipient). Try
+    the next one only if the previous one failed.
     """
     header = (
         parse_header(list_unsubscribe) if isinstance(list_unsubscribe, str) else list_unsubscribe
     )
     found: list[Action] = []
-    if dkim_verified and post is not None and is_one_click(post):
+    if isinstance(schemes, str):
+        raise ListUnsubscribeError("schemes must be a collection of scheme names")
+    if dkim_verified and "https" in schemes and post is not None and is_one_click(post):
         for uri in header.https:
             try:
                 one_click_request(uri)
